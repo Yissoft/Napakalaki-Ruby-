@@ -17,7 +17,7 @@ class Player
     @dead = dead
     @visibleTreasures = Array.new
     @hiddenTreasures = Array.new 
-    @pendingBadConsequence = nil
+    @pendingBadConsequence = BadConsequence.newLevelNumberOfTreasures("init", 0, 0,0)
   end
   
   attr_accessor :visibleTreasures,:hiddenTreasures,:level,:name,:dead,:pendingBadConsequence
@@ -235,6 +235,7 @@ class Player
         #LOSE
         else
           badconsequence = monster.getBadConsequence
+          badconsequence.to_s
           combatResult = :Lose
           applyBadConsequence(badconsequence)
         end  
@@ -264,7 +265,7 @@ class Player
     if(@pendingBadConsequence != nil and (!@pendingBadConsequence.isEmpty))
       @pendingBadConsequence.substractVisibleTreasure(treasure)
     end
-    dieIfNoTreasures
+    dieIfNoTreasure
     
   end
   #-----------------------------------------------------------------------------
@@ -275,7 +276,7 @@ class Player
       @pendingBadConsequence.substractHiddenTreasure(treasure)
     end
     
-    dieIfNoTreasures
+    dieIfNoTreasure
   end
   #-----------------------------------------------------------------------------
   public

@@ -46,7 +46,7 @@ class Napakalaki
       @currentPlayer = @players.at(pos)
     else
       i = @players.index(@currentPlayer)
-      pos = (i+1)%3
+      pos = (i+1)%tam
       @currentPlayer = @players.at(pos)
     end
   end

@@ -45,15 +45,15 @@ class BadConsequence
   #-----------------------------------------------------------------------------
   #Constructores que utilizan initialize
   def self.newLevelNumberOfTreasures(text,levels, nVisibleTreasures, nHiddenTreasures)
-    new(text,levels,nVisibleTreasures,nHiddenTreasures,nil,nil,nil)
+    new(text,levels,nVisibleTreasures,nHiddenTreasures,Array.new,Array.new,false)
   end
   
   def self.newLevelSpecificTreasures(text, level, specificVisibleTreasures, specificHiddenTreasures)
-    new(text,level,nil,nil,specificVisibleTreasures,specificHiddenTreasures,nil)
+    new(text,level,0,0,specificVisibleTreasures,specificHiddenTreasures,false)
   end
   
   def self.newDeath(aText)
-    new(aText,nil,nil,nil,nil,nil,true)
+    new(aText,0,0,0,Array.new,Array.new,true)
   end
   #-----------------------------------------------------------------------------
   private_class_method :new #Asi evitamos que se pueda utilizar new y utilicemos
@@ -76,7 +76,7 @@ class BadConsequence
       puts "  Tesoros ocultos especificos: #{@specificHiddenTreasures}"
     end
     
-    if(@death != nil)
+    if(@death)
       puts "  Este monstruo te mata."
     end
   end
@@ -139,15 +139,19 @@ class BadConsequence
       tH = Array.new #Tesoros Ocultos
       
       #ESPECIFICOS
-      if(@specificVisibleTreasures.include(visible.type))
-        tV << visible.type
+      visible.each do |v|
+        if(@specificVisibleTreasures.include?(v.type))
+          tV << v.type
+        end
       end
       
-      if(@specificHiddenTreasures.include(hidden.type))
-        tH << hidden.type
+      hidden.each do |h|
+        if(@specificHiddenTreasures.include?(h.type))
+          tH << h.type
+        end
       end
       
-      bc = BadConsequence.newLevelSpecificTreasures(@text,@levels,tV,tH)
+      bc = BadConsequence.newLevelSpecificTreasures(@text,0,tV,tH)
       
     else 
       visiblesize = visible.length
@@ -165,7 +169,7 @@ class BadConsequence
         nH = @nHiddenTreasures
       end
       
-      bc = self.newLevelNumberOfTreasures(@text,@levels,nV,nH)
+      bc = BandConsequence.newLevelNumberOfTreasures(@text,0,nV,nH)
       
     end
     
