@@ -116,16 +116,19 @@ class Player
   #-----------------------------------------------------------------------------
   private
   def computeGoldCoinsValue(treasures)
+    puts "ldsdfsaf"
     total = 0
     treasures.each do |t|
       total = total + t.goldCoins
     end
+=begin
     niveles = 0
     while(total >= 0)
       niveles = niveles + 1
       total - 1000
     end
-    return niveles
+=end
+    return total
   end
   #-----------------------------------------------------------------------------
   private 
@@ -355,5 +358,10 @@ class Player
   public
   def getHiddenTreasures
     return @hiddenTreasures
+  end
+  
+  public
+  def to_s
+    return " #{@name} || Nivel: #{@level} "
   end
 end

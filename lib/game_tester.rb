@@ -34,7 +34,7 @@ class GameTester
       if (command == Command::SHOWMONSTER) then
         begin #Mientras el jugador se decida a combatir 
           puts "******* ******* ******* ******* ******* ******* *******"
-          puts "\nTurno de: " + @game.getCurrentPlayer().name
+          puts "\nTurno de: " +  @game.getCurrentPlayer().to_s()
           command = getCommandBeforeFighting()
           command = processCommand(command)
         end while (command != Command::EXIT && command != Command::COMBAT)

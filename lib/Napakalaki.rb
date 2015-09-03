@@ -95,6 +95,7 @@ class Napakalaki
   #-----------------------------------------------------------------------------  
   public 
   def buyLevels(visibleT, hiddenT)
+    puts "fffffffff"
     return @currentPlayer.buyLevels(visibleT, hiddenT)
   end
   #-----------------------------------------------------------------------------
