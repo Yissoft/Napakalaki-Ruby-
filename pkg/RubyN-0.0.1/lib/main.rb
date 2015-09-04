@@ -16,9 +16,14 @@ module Test
      
         game = Napakalaki.instance
    
-        #Se prueba el juego con 2 jugadores
-   
-        test.play(game, 2);
+        #Se prueba el juego con 2 jugadores o más
+        nj = 0
+        loop do
+          puts "Introduce un numero de jugadores (2 o mas):"
+          nj = gets.chomp.to_i
+          break if nj >= 2
+        end
+        test.play(game, nj);
        
       end
       

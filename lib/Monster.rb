@@ -3,13 +3,16 @@
 # and open the template in the editor.
 require './BadConsequence.rb'
 require './Prize.rb'
+require './Card.rb'
 
-class Monster
-  def initialize(name, combatLevel,badconsequence,price)
+class Monster < Card
+  
+  def initialize(name, combatLevel,badconsequence,price,lcacp)
     @name = name
     @combatLevel = combatLevel
     @price = price
     @badconsequence = badconsequence
+    @levelChangeAgaintsCultistPlayer = lcacp
   end
   
   attr_accessor :name,:combatLevel,:price,:badconsequence
@@ -57,6 +60,17 @@ class Monster
   public
   def kills 
     return self.badconsequence.death
+  end
+  
+  #METODOS DE CULTISTS
+  public
+  def basicValue
+    return getcombatLevel
+  end
+    
+  public
+  def specialValue
+    return getcombatGained + @levelChangeAgaintsCultistPlayer
   end
   
 end

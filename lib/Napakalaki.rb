@@ -64,7 +64,25 @@ class Napakalaki
   def developCombat
     dealer = CardDealer.instance
     combatResult = @currentPlayer.combat(@currentMonster)
+    
     dealer.giveMonsterBack(@currentMonster)
+    
+    if(combatResult == :LOSEANDCONVERT)
+      puts "Hey man loseandconvert works"
+      #Se roba una carta cultist
+      cultist = dealer.nextCultist
+      
+      #Se crea el nuevo cultist
+      cultistPlayer = CultistPlayer.new(@currentPlayer, cultist)
+      
+      #Se sustituye el currentPlayer por cultistplayer nuevo
+      @currentPlayer = cultistPlayer
+      
+      #Sustituimos al player de la lista por el nuevo cultistplayer
+      indice = @players.index(@currentPlayer)
+      @players[indice] = cultistPlayer
+      
+    end
     return combatResult
   end
   #-----------------------------------------------------------------------------
@@ -95,6 +113,7 @@ class Napakalaki
   #-----------------------------------------------------------------------------  
   public 
   def buyLevels(visibleT, hiddenT)
+    puts "fffffffff"
     return @currentPlayer.buyLevels(visibleT, hiddenT)
   end
   #-----------------------------------------------------------------------------
@@ -139,7 +158,7 @@ class Napakalaki
   #-----------------------------------------------------------------------------
   public
   def endOfGame(combatResult)
-     if(combatResult == [CombatResult: "WinAndWinGame"])
+     if(combatResult == :WINANDWINGAME)
       return true
     else 
       return false

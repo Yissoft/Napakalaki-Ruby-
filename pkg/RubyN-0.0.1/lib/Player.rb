@@ -17,6 +17,7 @@ class Player
     @dead = dead
     @visibleTreasures = Array.new
     @hiddenTreasures = Array.new 
+    @pendingBadConsequence = BadConsequence.newLevelNumberOfTreasures("init", 0, 0,0)
   end
   
   attr_accessor :visibleTreasures,:hiddenTreasures,:level,:name,:dead,:pendingBadConsequence
@@ -30,6 +31,32 @@ class Player
   public
   def to_s
     puts "#{@name} con nivel #{@level}"
+  end
+  
+  public 
+  #CONSTRUCTOR DE COPIA (P5)
+  def copyPlayer(player)
+    
+    @level = player.level
+    @pendingBadConsequence = player.pendingBadConsequence
+    @dead = player.dead
+    @visibleTreasures = player.visibleTreasures
+    @hiddenTreasures = player.hiddenTreasures 
+    
+  end
+  
+  public
+  def shouldConver
+    
+    dice = Dice.instance
+    if(dice.nextNumber == 6)
+      puts "Ha salido 6 en el dado, te conviertes en cultista."
+      return true
+    else 
+      return false
+    end
+    
+    
   end
   #-----------------------------------------------------------------------------
 =begin
@@ -45,7 +72,7 @@ class Player
     
     visibleTreasures.each do |treasure|
       
-      if(treasure.type == necklace)
+      if(treasure.type == "NECKLACE")
         hasNecklace = true
       end
       
@@ -81,7 +108,7 @@ class Player
   #-----------------------------------------------------------------------------
   private 
   def dieIfNoTreasure
-    if(visibleTreasures.empty? and hiddenTreasures.empty?)
+    if(@visibleTreasures.length == 0  and @hiddenTreasures.length == 0)
       @dead = true
     end
   end
@@ -115,16 +142,13 @@ class Player
   #-----------------------------------------------------------------------------
   private
   def computeGoldCoinsValue(treasures)
+   
     total = 0
     treasures.each do |t|
       total = total + t.goldCoins
     end
-    niveles = 0
-    while(total >= 0)
-      niveles = niveles + 1
-      total - 1000
-    end
-    return niveles
+
+    return total
   end
   #-----------------------------------------------------------------------------
   private 
@@ -170,20 +194,19 @@ class Player
     if(treasure.type == [TreasureKind: "ONEHAND"])
    
       if(howManyVisibleTreasures([TreasureKind: "BOTHHANDS"]) == 0 and
-          howManyVisibleTreasures([TreasureKind: "ONEHAND"]) == 0 and
-            howManyVisibleTreasures([TreasureKind: "ONEHAND"])== 1)
+          howManyVisibleTreasures([TreasureKind: "ONEHAND"]) < 2)
         puede = true
       end
+      
     
     elsif(treasure.type == [TreasureKind: "BOTHHANDS"])
-      puts treasure.type
-      if(howManyVisibleTreasures([TreasureKind: "ONEHAND"]) == 0 and
-          howManyVisibleTreasures([TreasureKind: "BOTHHANDS"] == 0))
-        puede = true
-      end
+  
+        if(howManyVisibleTreasures([TreasureKind: "ONEHAND"]) == 0 and
+            howManyVisibleTreasures([TreasureKind: "BOTHHANDS"] == 0))
+          puede = true
+        end
     
     elsif(howManyVisibleTreasures(treasure.type) == 0)
-      puts treasure.type
       puede = true
     end
     
@@ -206,18 +229,24 @@ class Player
     return @dead
   end
   #-----------------------------------------------------------------------------
+  public 
+  def getOponentLevel(monster)
+    return monster.basicValue
+  end
+ 
+ 
   #def getHiddenTreasures y visible por attr_accesor
   public 
   def combat(monster)
-    myLevel = getCombatLevel
-    monsterLevel = monster.combatLevel
+    myLevel = getCombatLevel(monster)
+    monsterLevel = getOponentLevel
     combatResult = nil
     
     #WIN
     if(myLevel > monsterLevel)
       applyPrice(monster)
       if(@level >= 10)
-        combatResult = [CombatResult: "Win"]
+        combatResult = :WIN
       end
       
     #LOSE
@@ -226,21 +255,27 @@ class Player
       escapar = dice.nextNumber
       
       if(escapar < 5)
+        puts "Ha salido < 5 en el dado, mueres."
         amIDead = monster.kills
         #LOSEANDDIE
         if(amIDead)
           die
-          combatResult = :LoseAndDie
+          combatResult = :LOSEANDDIE
+          
+        elsif(shouldConvert)
+         
+          combatResult = :LOSEANDCONVERT
          
         #LOSE
         else
           badconsequence = monster.getBadConsequence
-          combatResult = :Lose
+          badconsequence.to_s
+          combatResult = :LOSE
           applyBadConsequence(badconsequence)
         end  
       #LOSEANDSCAPE  
       else
-        combatResult = :LoseAndScape
+        combatResult = :LOSEANDSCAPE
       end 
     end
     
@@ -264,7 +299,7 @@ class Player
     if(@pendingBadConsequence != nil and (!@pendingBadConsequence.isEmpty))
       @pendingBadConsequence.substractVisibleTreasure(treasure)
     end
-    dieIfNoTreasures
+    dieIfNoTreasure
     
   end
   #-----------------------------------------------------------------------------
@@ -275,7 +310,7 @@ class Player
       @pendingBadConsequence.substractHiddenTreasure(treasure)
     end
     
-    dieIfNoTreasures
+    dieIfNoTreasure
   end
   #-----------------------------------------------------------------------------
   public
@@ -324,6 +359,7 @@ class Player
     @hiddenTreasures << treasure
     
     number = dice.nextNumber
+    puts "El numero del dado al inicializar tesoros es #{number}"
     if(number >= 2 and number <=5)
       treasure = dealer.nextTreasure
       @hiddenTreasures << treasure
@@ -354,5 +390,10 @@ class Player
   public
   def getHiddenTreasures
     return @hiddenTreasures
+  end
+  
+  public
+  def to_s
+    return " #{@name} || Nivel: #{@level} "
   end
 end

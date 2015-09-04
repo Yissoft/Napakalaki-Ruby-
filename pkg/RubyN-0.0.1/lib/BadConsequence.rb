@@ -45,15 +45,15 @@ class BadConsequence
   #-----------------------------------------------------------------------------
   #Constructores que utilizan initialize
   def self.newLevelNumberOfTreasures(text,levels, nVisibleTreasures, nHiddenTreasures)
-    new(text,levels,nVisibleTreasures,nHiddenTreasures,nil,nil,nil)
+    new(text,levels,nVisibleTreasures,nHiddenTreasures,Array.new,Array.new,false)
   end
   
   def self.newLevelSpecificTreasures(text, level, specificVisibleTreasures, specificHiddenTreasures)
-    new(text,level,nil,nil,specificVisibleTreasures,specificHiddenTreasures,nil)
+    new(text,level,0,0,specificVisibleTreasures,specificHiddenTreasures,false)
   end
   
   def self.newDeath(aText)
-    new(aText,nil,nil,nil,nil,nil,true)
+    new(aText,0,0,0,Array.new,Array.new,true)
   end
   #-----------------------------------------------------------------------------
   private_class_method :new #Asi evitamos que se pueda utilizar new y utilicemos
@@ -76,7 +76,7 @@ class BadConsequence
       puts "  Tesoros ocultos especificos: #{@specificHiddenTreasures}"
     end
     
-    if(@death != nil)
+    if(@death)
       puts "  Este monstruo te mata."
     end
   end
@@ -138,37 +138,38 @@ class BadConsequence
       tV = Array.new #Tesoros Visibles
       tH = Array.new #Tesoros Ocultos
       
-      if(@specificVisibleTreasures != nil)
-        visible.each do |v|
-          if(@specificVisibleTreasures.include?(v.type))
-            tV << v.type
-          end
+      #ESPECIFICOS
+      visible.each do |v|
+        if(@specificVisibleTreasures.include?(v.type))
+          tV << v.type
         end
       end
       
-      if(@specificHiddenTreasures != nil)
-        hidden.each do |h|
-          if(@specificHiddenTreasures.include?(h.type))
-            tH << h.type
-          end
+      hidden.each do |h|
+        if(@specificHiddenTreasures.include?(h.type))
+          tH << h.type
         end
       end
       
       bc = BadConsequence.newLevelSpecificTreasures(@text,0,tV,tH)
       
     else 
-      nV = @nVisibleTreasures
-      nH = @nHiddenTreasures
+      visiblesize = visible.length
+      hiddensize = hidden.length
       
-      if(@nVisibleTreasures >= visible.size)
-        nV = visible.size
+      if(@nVisibleTreasures >= visiblesize)
+        nV = visiblesize
+      else
+        nV = @nVisibleTreasures
       end
       
-      if(@nHiddenTreasures >= hidden.size)
-        nH = hidden.size
+      if(@nHiddenTreasures >= hiddensize)
+        nH = hiddensize
+      else
+        nH = @nHiddenTreasures
       end
       
-      bc = self.newLevelNumberOfTreasures(@text,0,nV,nH)
+      bc = BadConsequence.newLevelNumberOfTreasures(@text,0,nV,nH)
       
     end
     

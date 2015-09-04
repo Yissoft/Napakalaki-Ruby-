@@ -2,11 +2,11 @@
 # To change this template file, choose Tools | Templates
 # and open the template in the editor.
 
-
+require './Card.rb'
 require './TreasureKind.rb'
 
 
-class Treasure
+class Treasure < Card
   def initialize(name,goldCoins,minBonus,maxBonus, type)
     @name = name
     @goldCoins = goldCoins
@@ -16,6 +16,15 @@ class Treasure
   end
   
   attr_accessor :name,:goldCoins,:minBonus,:maxBonus,:type
+  
+  def basicValue
+    return @minBonus
+  end
+  
+  def specialValue
+    return @maxBonus
+  end
+  
   
   public
   def to_s 

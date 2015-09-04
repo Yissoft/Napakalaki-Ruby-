@@ -169,7 +169,7 @@ class BadConsequence
         nH = @nHiddenTreasures
       end
       
-      bc = BandConsequence.newLevelNumberOfTreasures(@text,0,nV,nH)
+      bc = BadConsequence.newLevelNumberOfTreasures(@text,0,nV,nH)
       
     end
     

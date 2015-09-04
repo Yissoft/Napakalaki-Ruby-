@@ -2,13 +2,14 @@
 # To change this template file, choose Tools | Templates
 # and open the template in the editor.
 
-class CombatResult
+class Card
   
-  WINANDWINGAME = :WINANDWINGAME 
-  WIN = :WIN
-  LOSE = :LOSE
-  LOSEANDESCAPE = :LOSEANDESCAPE
-  LOSEANDDIE = :LOSEANDDIE
-  LOSEANDCOVERT = :LOSEANDCONVERT
-  
+  def basicValue
+    raise NotImplementedError.new
+  end
+
+  def specialValue
+    raise NotImplementedError.new
+  end
+
 end

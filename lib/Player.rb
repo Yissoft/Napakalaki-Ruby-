@@ -32,6 +32,32 @@ class Player
   def to_s
     puts "#{@name} con nivel #{@level}"
   end
+  
+  public 
+  #CONSTRUCTOR DE COPIA (P5)
+  def copyPlayer(player)
+    
+    @level = player.level
+    @pendingBadConsequence = player.pendingBadConsequence
+    @dead = player.dead
+    @visibleTreasures = player.visibleTreasures
+    @hiddenTreasures = player.hiddenTreasures 
+    
+  end
+  
+  public
+  def shouldConver
+    
+    dice = Dice.instance
+    if(dice.nextNumber == 6)
+      puts "Ha salido 6 en el dado, te conviertes en cultista."
+      return true
+    else 
+      return false
+    end
+    
+    
+  end
   #-----------------------------------------------------------------------------
 =begin
   Para obtener el nivel de combate tenemos que sumar el nivel del jugador más
@@ -116,16 +142,13 @@ class Player
   #-----------------------------------------------------------------------------
   private
   def computeGoldCoinsValue(treasures)
+   
     total = 0
     treasures.each do |t|
       total = total + t.goldCoins
     end
-    niveles = 0
-    while(total >= 0)
-      niveles = niveles + 1
-      total - 1000
-    end
-    return niveles
+
+    return total
   end
   #-----------------------------------------------------------------------------
   private 
@@ -206,18 +229,24 @@ class Player
     return @dead
   end
   #-----------------------------------------------------------------------------
+  public 
+  def getOponentLevel(monster)
+    return monster.basicValue
+  end
+ 
+ 
   #def getHiddenTreasures y visible por attr_accesor
   public 
   def combat(monster)
     myLevel = getCombatLevel
-    monsterLevel = monster.combatLevel
+    monsterLevel = getOponentLevel(monster)
     combatResult = nil
     
     #WIN
     if(myLevel > monsterLevel)
       applyPrice(monster)
       if(@level >= 10)
-        combatResult = [CombatResult: "Win"]
+        combatResult = :WIN
       end
       
     #LOSE
@@ -226,22 +255,27 @@ class Player
       escapar = dice.nextNumber
       
       if(escapar < 5)
+        puts "Ha salido < 5 en el dado, mueres."
         amIDead = monster.kills
         #LOSEANDDIE
         if(amIDead)
           die
-          combatResult = :LoseAndDie
+          combatResult = :LOSEANDDIE
+          
+        elsif(shouldConvert)
+         
+          combatResult = :LOSEANDCONVERT
          
         #LOSE
         else
           badconsequence = monster.getBadConsequence
           badconsequence.to_s
-          combatResult = :Lose
+          combatResult = :LOSE
           applyBadConsequence(badconsequence)
         end  
       #LOSEANDSCAPE  
       else
-        combatResult = :LoseAndScape
+        combatResult = :LOSEANDSCAPE
       end 
     end
     
@@ -284,7 +318,6 @@ class Player
     levelsMayBuy = computeGoldCoinsValue(visible)
     levelsMayBuy = levelsMayBuy + computeGoldCoinsValue(hidden)
     
-    puts "hola"
     levels = levelsMayBuy/1000
     canI = canIBuyLevels(levels)
     
@@ -326,6 +359,7 @@ class Player
     @hiddenTreasures << treasure
     
     number = dice.nextNumber
+    puts "El numero del dado al inicializar tesoros es #{number}"
     if(number >= 2 and number <=5)
       treasure = dealer.nextTreasure
       @hiddenTreasures << treasure
@@ -356,5 +390,10 @@ class Player
   public
   def getHiddenTreasures
     return @hiddenTreasures
+  end
+  
+  public
+  def to_s
+    return " #{@name} || Nivel: #{@level} "
   end
 end
