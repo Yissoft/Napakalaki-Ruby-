@@ -17,7 +17,7 @@ class CultistPlayer < Player
   
   def initialize(player,cultist)
     @@totalCultistPlayers =@@totalCultistPlayers + 1
-    super(player.name)
+    Super(player.name)
     copyPlayer(player)
     @myCultistCard = cultist
   end

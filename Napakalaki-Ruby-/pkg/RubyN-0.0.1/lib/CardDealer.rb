@@ -284,7 +284,7 @@ class CardDealer
     
     #Monstruos de cultist
     #El mal indecible impronunciable
-    badConsequence = BadConsequence.newLevelSpecificTreasures("Pierdes una mano visible.", 0, [TreasureKind: "ONEHAND"], nil)
+    badConsequence = BadConsequence.newLevelSpecificTreasures("Pierdes una mano visibles", 0, [TreasureKind: "ONEHAND"], nil)
     price = Prize.new(3,1)
     @unusedmonsters << Monster.new("El mal indecible impronunciable",10,badConsequence, price, -2)
     

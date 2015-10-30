@@ -68,7 +68,7 @@ class Napakalaki
     dealer.giveMonsterBack(@currentMonster)
     
     if(combatResult == :LOSEANDCONVERT)
-    
+      puts "Hey man loseandconvert works"
       #Se roba una carta cultist
       cultist = dealer.nextCultist
       

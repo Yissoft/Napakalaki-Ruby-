@@ -35,7 +35,7 @@ class GameTester
       if (command == Command::SHOWMONSTER) then
         begin #Mientras el jugador se decida a combatir 
           puts "******* ******* ******* ******* ******* ******* *******"
-          puts "\nTurno de: " +  @game.getCurrentPlayer().name
+          puts "\nTurno de: " +  @game.getCurrentPlayer().to_s()
           puts "Nivel del jugador: #{@game.getCurrentPlayer.level}"
           command = getCommandBeforeFighting()
           command = processCommand(command)
@@ -60,7 +60,7 @@ class GameTester
           if (combatResult != CombatResult::WINANDWINGAME) then
             begin #Hasta que se avance de turno 
               puts "******* ******* ******* ******* ******* ******* *******"
-              puts "\nTurno de: " +  @game.getCurrentPlayer().name
+              puts "\n\n Turno de: " 
               puts "Nivel del jugador: #{@game.getCurrentPlayer.level}"
               @game.getCurrentPlayer().to_s()
               command = getCommandAfterFighting()

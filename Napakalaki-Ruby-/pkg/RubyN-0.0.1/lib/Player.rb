@@ -17,7 +17,7 @@ class Player
     @dead = dead
     @visibleTreasures = Array.new
     @hiddenTreasures = Array.new 
-    @pendingBadConsequence = nil
+    @pendingBadConsequence = BadConsequence.newLevelNumberOfTreasures("init", 0, 0,0)
   end
   
   attr_accessor :visibleTreasures,:hiddenTreasures,:level,:name,:dead,:pendingBadConsequence
@@ -46,7 +46,7 @@ class Player
   end
   
   public
-  def shouldConvert
+  def shouldConver
     
     dice = Dice.instance
     if(dice.nextNumber == 6)
@@ -108,7 +108,7 @@ class Player
   #-----------------------------------------------------------------------------
   private 
   def dieIfNoTreasure
-    if(@visibleTreasures.size == 0  and @hiddenTreasures.size == 0)
+    if(@visibleTreasures.length == 0  and @hiddenTreasures.length == 0)
       @dead = true
     end
   end
@@ -117,8 +117,8 @@ class Player
   def discardNecklaceIfVisible
     visibleTreasures.each do |treasure|
       if(treasure.type == [TreasureKind: "NECKLACE"])
+        visibleTreasures.delete(treasure)
         @cardDealer.giveTreasureBack(treasure)
-        visibleTreasures.delete(treasure)        
       end
     end
   end
@@ -134,20 +134,9 @@ class Player
   def die
 
      @level = 1
-     dealer = CardDealer.instace
-     
-    @visibleTreasures.each do |t|
-      dealer.giveTreasureBack(t)
-    end
-    @visibleTreasures.clear
-    
-    @hiddenTreasures.each do |h|
-      dealer.giveTreasureBack(h)
-    end
-     
-    @hiddenTreasures.clear
-    
-    dieIfNoTreasures
+     @dead = true
+     @visibleTreasures.clear
+     @hiddenTreasures.clear
     
   end
   #-----------------------------------------------------------------------------
@@ -193,53 +182,35 @@ class Player
     nLevels = badConsequence.levels
     
     decrementLevels(nLevels)
-    @pendingBadConsequence = badConsequence.adjustToFitTreasureList(@visibleTreasures, @hiddenTreasures)
-    setPendingBadConsequence(@pendingBadConsequence)
+    badcons = badConsequence.adjustToFitTreasureList(@visibleTreasures, @hiddenTreasures)
+    setPendingBadConsequence(badcons)
     
   end
   #-----------------------------------------------------------------------------
   private
   def canMakeTreasureVisible(treasure)
-    
-    tipo = treasure.type
-    contador = 0
-    
-    if(tipo == [TreasureKind: "ONEHAND"])
- 
-      contador = howManyVisibleTreasures([TreasureKind: "ONEHAND"])
-      both = howManyVisibleTreasures([TreasureKind: "BOTHHANDS"])
-      
-      if(both == 0 and (contador == 0 or contador == 1))
-        return true
-      else 
-        return false
-      end  
-      
-      if(both == 1)
-        return false
-      end
-      
-      contador = 0 
-    end
-    
-    if(tipo == [TreasureKind: "BOTHHANDS"])
-      
-      if(howManyVisibleTreasures(tipo) == 0)
-        if(howManyVisibleTreasures([TreasureKind: "ONEHAND"]) == 0)
-          return true
-        end
-      else
-        return false
-      end
-      
-    end
-    
-    #Resto de casos
-    if(howManyVisibleTreasures(tipo) == 0)
-      return true
-    end
-    
+    puede = false
+  
+    if(treasure.type == [TreasureKind: "ONEHAND"])
    
+      if(howManyVisibleTreasures([TreasureKind: "BOTHHANDS"]) == 0 and
+          howManyVisibleTreasures([TreasureKind: "ONEHAND"]) < 2)
+        puede = true
+      end
+      
+    
+    elsif(treasure.type == [TreasureKind: "BOTHHANDS"])
+  
+        if(howManyVisibleTreasures([TreasureKind: "ONEHAND"]) == 0 and
+            howManyVisibleTreasures([TreasureKind: "BOTHHANDS"] == 0))
+          puede = true
+        end
+    
+    elsif(howManyVisibleTreasures(treasure.type) == 0)
+      puede = true
+    end
+    
+    return puede
   end
   #-----------------------------------------------------------------------------
   private
@@ -250,7 +221,6 @@ class Player
         contador = contador + 1
       end
     end
-  
     return contador
   end
   #-----------------------------------------------------------------------------
@@ -268,8 +238,8 @@ class Player
   #def getHiddenTreasures y visible por attr_accesor
   public 
   def combat(monster)
-    myLevel = getCombatLevel
-    monsterLevel = getOponentLevel(monster)
+    myLevel = getCombatLevel(monster)
+    monsterLevel = getOponentLevel
     combatResult = nil
     
     #WIN
@@ -285,16 +255,15 @@ class Player
       escapar = dice.nextNumber
       
       if(escapar < 5)
-        puts "Ha salido < 5 en el dado."
+        puts "Ha salido < 5 en el dado, mueres."
         amIDead = monster.kills
         #LOSEANDDIE
         if(amIDead)
           die
-          puts "El monstruo tiene mal rollo de matar, has muerto."
           combatResult = :LOSEANDDIE
           
         elsif(shouldConvert)
-          puts "Te vas a convertir en cultista."
+         
           combatResult = :LOSEANDCONVERT
          
         #LOSE
@@ -317,18 +286,15 @@ class Player
   public 
   def makeTreasureVisible(treasure)
     canI = canMakeTreasureVisible(treasure)
-    t = treasure.type
     if(canI)
       @visibleTreasures << treasure
       @hiddenTreasures.delete(treasure)
-      puts "Se aniadido un tesoro de tipo #{t}."
     end
     
   end
   #-----------------------------------------------------------------------------
   public 
   def discardVisibleTreasure(treasure)
-    
     @visibleTreasures.delete(treasure)
     if(@pendingBadConsequence != nil and (!@pendingBadConsequence.isEmpty))
       @pendingBadConsequence.substractVisibleTreasure(treasure)
@@ -339,13 +305,12 @@ class Player
   #-----------------------------------------------------------------------------
   public
   def discardHiddenTreasure(treasure)
-    
     @hiddenTreasures.delete(treasure)
     if(@pendingBadConsequence != nil and (!@pendingBadConsequence.isEmpty))
       @pendingBadConsequence.substractHiddenTreasure(treasure)
     end
-    dieIfNoTreasure
     
+    dieIfNoTreasure
   end
   #-----------------------------------------------------------------------------
   public
@@ -380,29 +345,23 @@ class Player
   public 
   def validState
     #No PendingBadConsequence, isEmpty es método de BadConsequence
-    
- 
-    return @pendingBadConsequence.isEmpty || @pendingBadConsequence == nil
+    return @pendingBadConsequence.isEmpty
   end
   #-----------------------------------------------------------------------------
   public 
   def initTreasures
     
-    #1
     dealer = CardDealer.instance
-    #2
     dice = Dice.instance
-    #3
+    
     bringToLife
-    #4
     treasure = dealer.nextTreasure
-    #5
     @hiddenTreasures << treasure
     
     number = dice.nextNumber
     puts "El numero del dado al inicializar tesoros es #{number}"
     if(number >= 2 and number <=5)
-       treasure = dealer.nextTreasure
+      treasure = dealer.nextTreasure
       @hiddenTreasures << treasure
     elsif(number == 6)
       2.times do 
